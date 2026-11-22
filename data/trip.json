@@ -1,0 +1,8 @@
+{
+  "people": ["Aru", "Dana", "Timur"],
+  "expenses": [
+    {"title": "Train tickets", "amount": 100.0, "payer": "Aru", "split": "equal"},
+    {"title": "Guesthouse", "amount": 240.0, "payer": "Dana", "split": "percent", "weights": {"Aru": 40, "Dana": 30, "Timur": 30}},
+    {"title": "Dinner", "amount": 75.5, "payer": "Timur", "split": "shares", "weights": {"Aru": 1, "Dana": 1, "Timur": 1}}
+  ]
+}
