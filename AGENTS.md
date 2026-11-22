@@ -44,7 +44,7 @@ git status / git diff / git log                  # read-only git
 
 - Python 3.9 syntax (no `match`, no `X | Y` type unions at runtime).
 - Money is entered with at most 2 decimals and displayed with 2 decimals. Balances are compared with a 0.01 tolerance.
-- User input must be validated in `ledger.add_expense` (the trust boundary). This is currently missing (risks R2/R3 in `docs/ASSIGNMENT5.md`).
+- Validate user input in `ledger.add_expense` (the trust boundary). Split-specific weight rules live in the strategy in `splits.py`. Raise `ValueError` with a message a person can act on. The CLI prints it as `error: …` and exits with code 2.
 - Functions return new data or mutate only the ledger dict they are given. No globals.
 - Small commits, one concern each, message in imperative mood.
 

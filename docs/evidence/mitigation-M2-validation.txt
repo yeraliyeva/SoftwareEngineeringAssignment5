@@ -1,0 +1,86 @@
+# M2 (R2/R3) test-first: new tests against the code BEFORE the fix
+$ python3 -m unittest tests.test_mitigations.M2ValidationTest tests.test_mitigations.M2CliTest
+FAIL: test_amount_must_be_a_positive_finite_number (tests.test_mitigations.M2ValidationTest) (amount=0)
+AssertionError: ValueError not raised
+FAIL: test_amount_must_be_a_positive_finite_number (tests.test_mitigations.M2ValidationTest) (amount=-50)
+AssertionError: ValueError not raised
+FAIL: test_amount_must_be_a_positive_finite_number (tests.test_mitigations.M2ValidationTest) (amount=nan)
+AssertionError: ValueError not raised
+FAIL: test_amount_must_be_a_positive_finite_number (tests.test_mitigations.M2ValidationTest) (amount=inf)
+AssertionError: ValueError not raised
+FAIL: test_payer_must_be_a_known_person (tests.test_mitigations.M2ValidationTest)
+AssertionError: ValueError not raised
+FAIL: test_percent_weights_must_add_up_to_100 (tests.test_mitigations.M2ValidationTest)
+AssertionError: ValueError not raised
+FAIL: test_shares_must_be_positive (tests.test_mitigations.M2ValidationTest)
+AssertionError: ValueError not raised
+FAIL: test_weighted_split_needs_weights (tests.test_mitigations.M2ValidationTest)
+AssertionError: ValueError not raised
+FAIL: test_weights_must_name_known_people (tests.test_mitigations.M2ValidationTest)
+AssertionError: ValueError not raised
+FAIL: test_malformed_weights_give_a_message_not_a_traceback (tests.test_mitigations.M2CliTest) (weights='Aru=50,Dana')
+AssertionError: 1 != 2
+FAIL: test_malformed_weights_give_a_message_not_a_traceback (tests.test_mitigations.M2CliTest) (weights='Aru=abc')
+AssertionError: 1 != 2
+FAIL: test_malformed_weights_give_a_message_not_a_traceback (tests.test_mitigations.M2CliTest) (weights='Aru=50,Aru=50')
+AssertionError: 0 != 2
+FAIL: test_malformed_weights_give_a_message_not_a_traceback (tests.test_mitigations.M2CliTest)
+AssertionError: Lists differ: [{'title': 'Hotel', 'amount': 100.0, 'paye[52 chars].0}}] != []
+FAIL: test_typo_in_payer_is_rejected_and_file_unchanged (tests.test_mitigations.M2CliTest)
+AssertionError: Tuples differ: (0, '') != (2, "error: unknown payer 'Ary' (known: Aru, Dana)")
+Ran 9 tests in 0.285s
+FAILED (failures=14)
+
+# AFTER the fix
+$ python3 -m unittest -v
+test_ac2_split_amounts_match_baseline_examples (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac3_balances_sum_to_zero (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac4_settle_transfers_clear_all_balances (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac5_cli_output_for_sample_unchanged (tests.test_acceptance.AcceptanceTest) ... ok
+test_add_person_ignores_duplicates (tests.test_ledger.LedgerTest) ... ok
+test_equal_split (tests.test_ledger.LedgerTest) ... ok
+test_percent_split (tests.test_ledger.LedgerTest) ... ok
+test_settle_clears_debts (tests.test_ledger.LedgerTest) ... ok
+test_shares_split (tests.test_ledger.LedgerTest) ... ok
+test_late_joiner_shares_expenses_added_after_joining (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_old_records_without_participants_still_load (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_person_added_later_does_not_pay_for_earlier_equal_expense (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_malformed_weights_give_a_message_not_a_traceback (tests.test_mitigations.M2CliTest) ... ok
+test_typo_in_payer_is_rejected_and_file_unchanged (tests.test_mitigations.M2CliTest) ... ok
+test_amount_must_be_a_positive_finite_number (tests.test_mitigations.M2ValidationTest) ... ok
+test_payer_must_be_a_known_person (tests.test_mitigations.M2ValidationTest) ... ok
+test_percent_weights_must_add_up_to_100 (tests.test_mitigations.M2ValidationTest) ... ok
+test_shares_must_be_positive (tests.test_mitigations.M2ValidationTest) ... ok
+test_valid_expenses_are_still_accepted (tests.test_mitigations.M2ValidationTest) ... ok
+test_weighted_split_needs_weights (tests.test_mitigations.M2ValidationTest) ... ok
+test_weights_must_name_known_people (tests.test_mitigations.M2ValidationTest) ... ok
+test_new_strategy_is_picked_up_by_ledger_and_cli_without_other_edits (tests.test_splits.SplitStrategyTest) ... ok
+test_unknown_split_type_is_an_error_everywhere (tests.test_splits.SplitStrategyTest) ... ok
+Ran 23 tests in 0.436s
+OK
+$ ruff check .
+All checks passed!
+
+# CLI: the R3 scenario with a temp file
+$ python3 -m tripsplit --file <tmp> add Taxi 40 Ary
+error: unknown payer 'Ary' (known: Aru, Dana)
+exit=2
+$ python3 -m tripsplit --file <tmp> add Refund -50 Aru
+error: amount must be a positive number, got -50.0
+exit=2
+$ python3 -m tripsplit --file <tmp> add Odd nan Aru
+error: amount must be a positive number, got nan
+exit=2
+$ python3 -m tripsplit --file <tmp> add Hotel 200 Dana --split percent --weights Aru=50,Dana=25
+error: percent weights must add up to 100, got 75
+exit=2
+$ python3 -m tripsplit --file <tmp> add Hotel 200 Dana --split percent --weights Aru=50,Dana
+error: bad --weights item 'Dana': use Name=number, e.g. "Aru=50,Dana=50"
+exit=2
+$ python3 -m tripsplit --file <tmp> add Taxi 40 Aru
+Added Taxi (40.00)
+exit=0
+$ python3 -m tripsplit --file <tmp> balance
+Aru        +20.00
+Dana       -20.00
+exit=0

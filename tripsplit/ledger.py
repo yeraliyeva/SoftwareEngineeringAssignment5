@@ -1,5 +1,6 @@
 """Shared-expense ledger: who paid what, who owes whom."""
 import json
+import math
 import os
 
 from .splits import split_expense
@@ -25,11 +26,20 @@ def add_person(ledger, name):
 
 
 def add_expense(ledger, title, amount, payer, split="equal", weights=None):
+    """Trust boundary (R2/R3): validate everything first, so nothing invalid is ever stored."""
+    people = ledger["people"]
+    if isinstance(amount, bool) or not isinstance(amount, (int, float)) or not math.isfinite(amount) or amount <= 0:
+        raise ValueError(f"amount must be a positive number, got {amount!r}")
+    if payer not in people:
+        raise ValueError(f"unknown payer {payer!r} (known: {', '.join(people) or 'nobody yet'})")
     expense = {"title": title, "amount": amount, "payer": payer, "split": split}
     if split == "equal":
         expense["participants"] = list(ledger["people"])  # R1: freeze who shares it
     if weights:
         expense["weights"] = weights
+    unknown = [p for p in split_expense(expense, people) if p not in people]  # also runs the strategy's checks
+    if unknown:
+        raise ValueError(f"unknown people in weights: {', '.join(unknown)}")
     ledger["expenses"].append(expense)
     return expense
 

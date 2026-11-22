@@ -1,5 +1,6 @@
 """Command line interface: python -m tripsplit <command>."""
 import argparse
+import sys
 
 from . import ledger as L
 from .splits import SPLITS
@@ -11,8 +12,17 @@ def parse_weights(text):
         return None
     out = {}
     for pair in text.split(","):
-        name, value = pair.split("=")
-        out[name.strip()] = float(value)
+        name, sep, value = pair.partition("=")
+        name = name.strip()
+        try:
+            number = float(value)
+        except ValueError:
+            number = None
+        if not sep or not name or number is None:
+            raise ValueError(f'bad --weights item {pair!r}: use Name=number, e.g. "Aru=50,Dana=50"')
+        if name in out:
+            raise ValueError(f"{name} appears twice in --weights")
+        out[name] = number
     return out
 
 
@@ -36,25 +46,29 @@ def main(argv=None):
     sub.add_parser("settle")
 
     args = parser.parse_args(argv)
-    data = L.load(args.file)
+    try:
+        data = L.load(args.file)
 
-    if args.cmd == "person":
-        L.add_person(data, args.name)
-        L.save(data, args.file)
-        print(f"Added {args.name}")
-    elif args.cmd == "add":
-        L.add_expense(data, args.title, args.amount, args.payer, args.split, parse_weights(args.weights))
-        L.save(data, args.file)
-        print(f"Added {args.title} ({args.amount:.2f})")
-    elif args.cmd == "list":
-        for e in data["expenses"]:
-            print(L.describe(data, e))
-    elif args.cmd == "balance":
-        for person, b in L.balances(data).items():
-            print(f"{person:10} {b:+.2f}")
-    elif args.cmd == "settle":
-        for frm, to, amount in L.settle(data):
-            print(f"{frm} -> {to}: {amount:.2f}")
+        if args.cmd == "person":
+            L.add_person(data, args.name)
+            L.save(data, args.file)
+            print(f"Added {args.name}")
+        elif args.cmd == "add":
+            L.add_expense(data, args.title, args.amount, args.payer, args.split, parse_weights(args.weights))
+            L.save(data, args.file)
+            print(f"Added {args.title} ({args.amount:.2f})")
+        elif args.cmd == "list":
+            for e in data["expenses"]:
+                print(L.describe(data, e))
+        elif args.cmd == "balance":
+            for person, b in L.balances(data).items():
+                print(f"{person:10} {b:+.2f}")
+        elif args.cmd == "settle":
+            for frm, to, amount in L.settle(data):
+                print(f"{frm} -> {to}: {amount:.2f}")
+    except ValueError as err:  # bad input or unreadable file: one clear line, no traceback
+        print(f"error: {err}", file=sys.stderr)
+        return 2
     return 0
 
 

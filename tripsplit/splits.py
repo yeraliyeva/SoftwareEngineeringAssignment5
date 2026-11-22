@@ -2,7 +2,18 @@
 
 Each strategy takes (amount, expense, people) and returns {person: part}.
 Adding a split type = one function + one SPLITS entry; ledger and CLI pick it up.
+A strategy raises ValueError when the expense's weights do not make sense for it.
 """
+import math
+
+
+def _weights(expense):
+    weights = expense.get("weights")
+    if not weights:
+        raise ValueError(f'a {expense["split"]} split needs --weights, e.g. "Aru=50,Dana=50"')
+    if any(not math.isfinite(w) or w < 0 for w in weights.values()):
+        raise ValueError("weights must be finite numbers and must not be negative")
+    return weights
 
 
 def equal(amount, expense, people):
@@ -13,12 +24,19 @@ def equal(amount, expense, people):
 
 
 def percent(amount, expense, people):
-    return {p: amount * pct / 100 for p, pct in expense["weights"].items()}
+    weights = _weights(expense)
+    total = sum(weights.values())
+    if abs(total - 100) > 0.01:
+        raise ValueError(f"percent weights must add up to 100, got {total:g}")
+    return {p: amount * pct / 100 for p, pct in weights.items()}
 
 
 def shares(amount, expense, people):
-    total = sum(expense["weights"].values())
-    return {p: amount * s / total for p, s in expense["weights"].items()}
+    weights = _weights(expense)
+    total = sum(weights.values())
+    if total <= 0:
+        raise ValueError("shares must add up to more than 0")
+    return {p: amount * s / total for p, s in weights.items()}
 
 
 SPLITS = {"equal": equal, "percent": percent, "shares": shares}
