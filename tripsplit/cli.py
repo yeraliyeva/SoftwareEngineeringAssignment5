@@ -1,6 +1,5 @@
 """Command line interface: python -m tripsplit <command>."""
 import argparse
-import json
 
 from . import ledger as L
 
