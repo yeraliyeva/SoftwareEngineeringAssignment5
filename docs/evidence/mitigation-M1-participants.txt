@@ -1,0 +1,38 @@
+# M1 (R1) test-first: new tests against the code BEFORE the fix
+$ python3 -m unittest -v tests.test_mitigations
+test_late_joiner_shares_expenses_added_after_joining (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_old_records_without_participants_still_load (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_person_added_later_does_not_pay_for_earlier_equal_expense (tests.test_mitigations.M1LateJoinerTest) ... FAIL
+AssertionError: {'Aru': 67.5, 'Dana': -22.5, 'Timur': -22.5, 'Erlan': -22.5} != {'Aru': 60, 'Dana': -30, 'Timur': -30, 'Erlan': 0}
+Ran 3 tests in 0.000s
+FAILED (failures=1)
+
+# AFTER the fix
+$ python3 -m unittest -v
+test_ac2_split_amounts_match_baseline_examples (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac3_balances_sum_to_zero (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac4_settle_transfers_clear_all_balances (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac5_cli_output_for_sample_unchanged (tests.test_acceptance.AcceptanceTest) ... ok
+test_add_person_ignores_duplicates (tests.test_ledger.LedgerTest) ... ok
+test_equal_split (tests.test_ledger.LedgerTest) ... ok
+test_percent_split (tests.test_ledger.LedgerTest) ... ok
+test_settle_clears_debts (tests.test_ledger.LedgerTest) ... ok
+test_shares_split (tests.test_ledger.LedgerTest) ... ok
+test_late_joiner_shares_expenses_added_after_joining (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_old_records_without_participants_still_load (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_person_added_later_does_not_pay_for_earlier_equal_expense (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_new_strategy_is_picked_up_by_ledger_and_cli_without_other_edits (tests.test_splits.SplitStrategyTest) ... ok
+test_unknown_split_type_is_an_error_everywhere (tests.test_splits.SplitStrategyTest) ... ok
+Ran 14 tests in 0.109s
+OK
+$ ruff check .
+All checks passed!
+
+# CLI check with a temp file: Erlan joins after the taxi
+Added Taxi (90.00)
+Added Erlan
+$ python3 -m tripsplit --file <tmp> balance
+Aru        +60.00
+Dana       -30.00
+Timur      -30.00
+Erlan      +0.00

@@ -26,6 +26,8 @@ def add_person(ledger, name):
 
 def add_expense(ledger, title, amount, payer, split="equal", weights=None):
     expense = {"title": title, "amount": amount, "payer": payer, "split": split}
+    if split == "equal":
+        expense["participants"] = list(ledger["people"])  # R1: freeze who shares it
     if weights:
         expense["weights"] = weights
     ledger["expenses"].append(expense)

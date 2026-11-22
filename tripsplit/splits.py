@@ -6,6 +6,8 @@ Adding a split type = one function + one SPLITS entry; ledger and CLI pick it up
 
 
 def equal(amount, expense, people):
+    # Records saved before A5 have no "participants": fall back to everyone (old behaviour).
+    people = expense.get("participants", people)
     each = amount / len(people)
     return {p: each for p in people}
 
