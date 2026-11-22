@@ -1,0 +1,23 @@
+$ ruff --version
+ruff 0.17.1
+$ ruff check .
+F401 [*] `json` imported but unused
+ --> tripsplit/cli.py:3:8
+  |
+1 | """Command line interface: python -m tripsplit <command>."""
+2 | import argparse
+3 | import json
+  |        ^^^^
+4 |
+5 | from . import ledger as L
+  |
+help: Remove unused import: `json`
+  |
+2 | import argparse
+  - import json
+3 |
+  |
+
+Found 1 error.
+[*] 1 fixable with `--fix`.
+exit=1

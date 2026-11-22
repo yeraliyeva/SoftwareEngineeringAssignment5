@@ -1,0 +1,30 @@
+## R1 late joiner re-splits old equal expense
+before: {'Aru': 60.0, 'Dana': -30.0, 'Timur': -30.0}
+after add_person(Erlan): {'Aru': 67.5, 'Dana': -22.5, 'Timur': -22.5, 'Erlan': -22.5}
+## R2 unchecked weights / amounts
+percent 50+25: {'Aru': -100.0, 'Dana': 150.0, 'Timur': 0.0} sum = 50.0 settle: [('Aru', 'Dana', 100.0)]
+shares all 0 -> raises ZeroDivisionError division by zero
+amount -50 accepted: {'Aru': -33.33333333333333, 'Dana': 16.666666666666668, 'Timur': 16.666666666666668}
+amount nan accepted: {'Aru': nan, 'Dana': nan, 'Timur': nan}
+## R3 unknown name saved to disk, then balance crashes (temp file)
+add payer=Ary exit 0 Added Taxi (40.00)
+saved payer: Ary
+balance exit 1 | KeyError: 'Ary'
+list exit 0 | Taxi: 40.00 paid by Ary -> Aru 20.00, Dana 20.00
+## R4 unknown split type
+balances: {'Aru': 90.0, 'Dana': 0.0, 'Timur': 0.0} sum = 90.0
+describe: X: 90.00 paid by Aru -> ?
+## R5 rounding in settle
+settle: [('Dana', 'Aru', 33.33), ('Timur', 'Aru', 33.33)] paid total 66.66 owed 66.67
+## R6 parse_weights + non-atomic save
+parse_weights('Aru=50,Dana') -> raises ValueError not enough values to unpack (expected 2, got 1)
+parse_weights('Aru=abc') -> raises ValueError could not convert string to float: 'abc'
+parse_weights('Aru=50,Aru=50') -> {'Aru': 50.0}
+good file bytes: 177
+save() of record with non-JSON value -> raises TypeError Object of type object is not JSON serializable
+file after failed save, bytes: 177
+load() after failed save -> raises JSONDecodeError Expecting value: line 13 column 15 (char 177)
+## R7 default --file is the tracked sample
+DEFAULT_FILE -> data/trip.json
+tracked: data/trip.json
+## R10 --file overwrites any path: not executed (would need writing outside a temp dir); code read only

@@ -1,0 +1,14 @@
+$ python3 --version
+Python 3.9.6
+$ python3 -m unittest -v
+test_add_person_ignores_duplicates (tests.test_ledger.LedgerTest) ... ok
+test_equal_split (tests.test_ledger.LedgerTest) ... ok
+test_percent_split (tests.test_ledger.LedgerTest) ... ok
+test_settle_clears_debts (tests.test_ledger.LedgerTest) ... ok
+test_shares_split (tests.test_ledger.LedgerTest) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK
+exit=0
