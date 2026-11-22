@@ -2,7 +2,7 @@
 
 - **Tool / model:** Claude Code (Anthropic), model Claude Opus 5.5, read-only "Explore" sub-agent (no Edit/Write tools)
 - **Date:** 2026-11-22
-- **Reviewed version:** `a5-baseline` (commit `f064277`)
+- **Reviewed version:** `a5-baseline` (commit `c902570`)
 - **Prompt (verbatim summary):** "You are doing a READ-ONLY risk review of a small Python 3.9 repository … Do NOT create, modify or delete any files (including data/trip.json — do not run CLI commands that save …). You may read files and run read-only commands (cat, grep, `python3 -I -c` one-liners on in-memory data, `python3 -m unittest`, `ruff check .`). Propose 8–10 candidate risks spanning: correctness, maintainability, security, dependency, agent operations. For each give: ID, category, title, cause → event → consequence, affected files/lines, evidence, confidence (confirmed / plausible / speculative), likelihood 1–3, impact 1–3. Do not overstate; if you are guessing, say so."
 - **Status:** The text below is unedited AI output. Its claims are **not** accepted until verified. Verification is in `verify-ai-findings-baseline.txt` and in the risk register in `docs/ASSIGNMENT5.md`.
 
@@ -10,7 +10,7 @@
 
 ## TripSplit — read-only risk review
 
-Scope: `tripsplit/ledger.py`, `tripsplit/cli.py`, `tripsplit/__main__.py`, 5 unit tests. One commit (`f064277`, tag `a5-baseline`). Ran: `python3 -m unittest` (5 OK, Py 3.9.6), `ruff check .` (1 error), read-only CLI (`balance`/`settle`/`list`), and in-memory `python3 -I -c` reproductions. `data/trip.json` was not modified.
+Scope: `tripsplit/ledger.py`, `tripsplit/cli.py`, `tripsplit/__main__.py`, 5 unit tests. One commit (`c902570`, tag `a5-baseline`). Ran: `python3 -m unittest` (5 OK, Py 3.9.6), `ruff check .` (1 error), read-only CLI (`balance`/`settle`/`list`), and in-memory `python3 -I -c` reproductions. `data/trip.json` was not modified.
 
 ### R1 — Correctness: equal split is recomputed against the *current* roster, so adding a person rewrites past expenses
 - Cause → event → consequence: `balances()` splits "equal" expenses over `ledger["people"]` at calculation time, not the participants at the time of the expense → someone joins mid-trip → every earlier equal expense is silently re-split including the newcomer, who is charged for things they did not share, and earlier debts shrink.

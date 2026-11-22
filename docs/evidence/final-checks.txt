@@ -1,0 +1,39 @@
+$ python3 --version
+Python 3.9.6
+$ python3 -m unittest -v
+test_ac2_split_amounts_match_baseline_examples (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac3_balances_sum_to_zero (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac4_settle_transfers_clear_all_balances (tests.test_acceptance.AcceptanceTest) ... ok
+test_ac5_cli_output_for_sample_unchanged (tests.test_acceptance.AcceptanceTest) ... ok
+test_add_person_ignores_duplicates (tests.test_ledger.LedgerTest) ... ok
+test_equal_split (tests.test_ledger.LedgerTest) ... ok
+test_percent_split (tests.test_ledger.LedgerTest) ... ok
+test_settle_clears_debts (tests.test_ledger.LedgerTest) ... ok
+test_shares_split (tests.test_ledger.LedgerTest) ... ok
+test_late_joiner_shares_expenses_added_after_joining (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_old_records_without_participants_still_load (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_person_added_later_does_not_pay_for_earlier_equal_expense (tests.test_mitigations.M1LateJoinerTest) ... ok
+test_malformed_weights_give_a_message_not_a_traceback (tests.test_mitigations.M2CliTest) ... ok
+test_typo_in_payer_is_rejected_and_file_unchanged (tests.test_mitigations.M2CliTest) ... ok
+test_amount_must_be_a_positive_finite_number (tests.test_mitigations.M2ValidationTest) ... ok
+test_payer_must_be_a_known_person (tests.test_mitigations.M2ValidationTest) ... ok
+test_percent_weights_must_add_up_to_100 (tests.test_mitigations.M2ValidationTest) ... ok
+test_shares_must_be_positive (tests.test_mitigations.M2ValidationTest) ... ok
+test_valid_expenses_are_still_accepted (tests.test_mitigations.M2ValidationTest) ... ok
+test_weighted_split_needs_weights (tests.test_mitigations.M2ValidationTest) ... ok
+test_weights_must_name_known_people (tests.test_mitigations.M2ValidationTest) ... ok
+test_new_strategy_is_picked_up_by_ledger_and_cli_without_other_edits (tests.test_splits.SplitStrategyTest) ... ok
+test_unknown_split_type_is_an_error_everywhere (tests.test_splits.SplitStrategyTest) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.443s
+
+OK
+exit=0
+$ ruff check .
+All checks passed!
+exit=0
+$ python3 -m compileall -q tripsplit tests
+exit=0
+$ git diff --stat a5-baseline -- data/trip.json   (sample data untouched?)
+(empty = unchanged)
