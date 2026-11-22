@@ -16,12 +16,14 @@ The only data file is `data/trip.json`, which holds fictional sample names and a
 |------|------|
 | `tripsplit/__main__.py` | entry point for `python3 -m tripsplit` |
 | `tripsplit/cli.py` | argparse commands `person`, `add`, `list`, `balance`, `settle`. Input parsing only |
-| `tripsplit/ledger.py` | load/save JSON, add people/expenses, balances, settle-up, and (for now) the split maths |
+| `tripsplit/ledger.py` | load/save JSON, add people/expenses, balances, settle-up |
+| `tripsplit/splits.py` | split strategies `equal`, `percent`, `shares` (`SPLITS`). The single place that knows how an amount is divided |
 | `tests/` | `unittest` suites. `test_acceptance.py` holds the acceptance criteria |
 | `data/trip.json` | tracked sample ledger. Tests must never write to it |
 | `docs/` | Assignment 5 report and saved command output |
 
-Rule of thumb: the CLI parses and prints, and `ledger.py` stores, divides and sums.
+Rule of thumb: the CLI parses and prints, `ledger.py` stores and sums, `splits.py` divides.
+New split type = one function + one `SPLITS` entry, plus tests. Nothing else should change.
 
 ## 3. Setup
 

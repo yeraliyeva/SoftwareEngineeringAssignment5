@@ -2,6 +2,8 @@
 import json
 import os
 
+from .splits import split_expense
+
 DEFAULT_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "trip.json")
 
 
@@ -34,34 +36,15 @@ def balances(ledger):
     """Positive balance = the person should receive money."""
     result = {p: 0.0 for p in ledger["people"]}
     for e in ledger["expenses"]:
-        people = ledger["people"]
         result[e["payer"]] += e["amount"]
-        if e["split"] == "equal":
-            for p in people:
-                result[p] -= e["amount"] / len(people)
-        elif e["split"] == "percent":
-            for p, pct in e["weights"].items():
-                result[p] -= e["amount"] * pct / 100
-        elif e["split"] == "shares":
-            total = sum(e["weights"].values())
-            for p, s in e["weights"].items():
-                result[p] -= e["amount"] * s / total
+        for p, part in split_expense(e, ledger["people"]).items():
+            result[p] -= part
     return result
 
 
 def describe(ledger, e):
     """One line per expense for the `list` command."""
-    people = ledger["people"]
-    if e["split"] == "equal":
-        each = e["amount"] / len(people)
-        parts = ", ".join(f"{p} {each:.2f}" for p in people)
-    elif e["split"] == "percent":
-        parts = ", ".join(f"{p} {e['amount'] * pct / 100:.2f}" for p, pct in e["weights"].items())
-    elif e["split"] == "shares":
-        total = sum(e["weights"].values())
-        parts = ", ".join(f"{p} {e['amount'] * s / total:.2f}" for p, s in e["weights"].items())
-    else:
-        parts = "?"
+    parts = ", ".join(f"{p} {part:.2f}" for p, part in split_expense(e, ledger["people"]).items())
     return f"{e['title']}: {e['amount']:.2f} paid by {e['payer']} -> {parts}"
 
 

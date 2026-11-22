@@ -2,6 +2,7 @@
 import argparse
 
 from . import ledger as L
+from .splits import SPLITS
 
 
 def parse_weights(text):
@@ -27,7 +28,7 @@ def main(argv=None):
     a.add_argument("title")
     a.add_argument("amount", type=float)
     a.add_argument("payer")
-    a.add_argument("--split", default="equal", choices=["equal", "percent", "shares"])
+    a.add_argument("--split", default="equal", choices=list(SPLITS))
     a.add_argument("--weights")
 
     sub.add_parser("list")
